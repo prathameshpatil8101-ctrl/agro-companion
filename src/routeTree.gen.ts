@@ -9,8 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WeatherRouteImport } from './routes/weather'
+import { Route as OrganicFarmingRouteImport } from './routes/organic-farming'
+import { Route as MarketPricesRouteImport } from './routes/market-prices'
+import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as DiseaseDiagnosisRouteImport } from './routes/disease-diagnosis'
+import { Route as CropRecommendationRouteImport } from './routes/crop-recommendation'
+import { Route as AiChatRouteImport } from './routes/ai-chat'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WeatherRoute = WeatherRouteImport.update({
+  id: '/weather',
+  path: '/weather',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganicFarmingRoute = OrganicFarmingRouteImport.update({
+  id: '/organic-farming',
+  path: '/organic-farming',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketPricesRoute = MarketPricesRouteImport.update({
+  id: '/market-prices',
+  path: '/market-prices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiseaseDiagnosisRoute = DiseaseDiagnosisRouteImport.update({
+  id: '/disease-diagnosis',
+  path: '/disease-diagnosis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CropRecommendationRoute = CropRecommendationRouteImport.update({
+  id: '/crop-recommendation',
+  path: '/crop-recommendation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiChatRoute = AiChatRouteImport.update({
+  id: '/ai-chat',
+  path: '/ai-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +61,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai-chat': typeof AiChatRoute
+  '/crop-recommendation': typeof CropRecommendationRoute
+  '/disease-diagnosis': typeof DiseaseDiagnosisRoute
+  '/feedback': typeof FeedbackRoute
+  '/market-prices': typeof MarketPricesRoute
+  '/organic-farming': typeof OrganicFarmingRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai-chat': typeof AiChatRoute
+  '/crop-recommendation': typeof CropRecommendationRoute
+  '/disease-diagnosis': typeof DiseaseDiagnosisRoute
+  '/feedback': typeof FeedbackRoute
+  '/market-prices': typeof MarketPricesRoute
+  '/organic-farming': typeof OrganicFarmingRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai-chat': typeof AiChatRoute
+  '/crop-recommendation': typeof CropRecommendationRoute
+  '/disease-diagnosis': typeof DiseaseDiagnosisRoute
+  '/feedback': typeof FeedbackRoute
+  '/market-prices': typeof MarketPricesRoute
+  '/organic-farming': typeof OrganicFarmingRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/ai-chat'
+    | '/crop-recommendation'
+    | '/disease-diagnosis'
+    | '/feedback'
+    | '/market-prices'
+    | '/organic-farming'
+    | '/weather'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/ai-chat'
+    | '/crop-recommendation'
+    | '/disease-diagnosis'
+    | '/feedback'
+    | '/market-prices'
+    | '/organic-farming'
+    | '/weather'
+  id:
+    | '__root__'
+    | '/'
+    | '/ai-chat'
+    | '/crop-recommendation'
+    | '/disease-diagnosis'
+    | '/feedback'
+    | '/market-prices'
+    | '/organic-farming'
+    | '/weather'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiChatRoute: typeof AiChatRoute
+  CropRecommendationRoute: typeof CropRecommendationRoute
+  DiseaseDiagnosisRoute: typeof DiseaseDiagnosisRoute
+  FeedbackRoute: typeof FeedbackRoute
+  MarketPricesRoute: typeof MarketPricesRoute
+  OrganicFarmingRoute: typeof OrganicFarmingRoute
+  WeatherRoute: typeof WeatherRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/weather': {
+      id: '/weather'
+      path: '/weather'
+      fullPath: '/weather'
+      preLoaderRoute: typeof WeatherRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organic-farming': {
+      id: '/organic-farming'
+      path: '/organic-farming'
+      fullPath: '/organic-farming'
+      preLoaderRoute: typeof OrganicFarmingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market-prices': {
+      id: '/market-prices'
+      path: '/market-prices'
+      fullPath: '/market-prices'
+      preLoaderRoute: typeof MarketPricesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disease-diagnosis': {
+      id: '/disease-diagnosis'
+      path: '/disease-diagnosis'
+      fullPath: '/disease-diagnosis'
+      preLoaderRoute: typeof DiseaseDiagnosisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crop-recommendation': {
+      id: '/crop-recommendation'
+      path: '/crop-recommendation'
+      fullPath: '/crop-recommendation'
+      preLoaderRoute: typeof CropRecommendationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-chat': {
+      id: '/ai-chat'
+      path: '/ai-chat'
+      fullPath: '/ai-chat'
+      preLoaderRoute: typeof AiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +197,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiChatRoute: AiChatRoute,
+  CropRecommendationRoute: CropRecommendationRoute,
+  DiseaseDiagnosisRoute: DiseaseDiagnosisRoute,
+  FeedbackRoute: FeedbackRoute,
+  MarketPricesRoute: MarketPricesRoute,
+  OrganicFarmingRoute: OrganicFarmingRoute,
+  WeatherRoute: WeatherRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

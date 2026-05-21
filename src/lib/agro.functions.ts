@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { recommendFromCsv } from "./csvCrops";
-import { getCropsByLocation, filterBySeasonAndSoil } from "../data/cropDatabase";
+import { recommendCropsByLocation } from "../data/cropDatabase";
 import { getMarketPricesByLocation } from "../data/marketPriceDatabase";
 import { pickFallbackDisease } from "../data/diseaseDatabase";
 
@@ -64,9 +64,11 @@ export const recommendCrops = createServerFn({ method: "POST" })
       });
       ctx = `N=${data.N}, P=${data.P}, K=${data.K}, pH=${data.ph}, temp=${data.temperature}°C, humidity=${data.humidity}%, rainfall=${data.rainfall}mm in ${data.state || "India"}`;
     } else {
-      const list = getCropsByLocation(data.state, data.district);
-      crops = filterBySeasonAndSoil(list, data.season, data.soilType);
-      if (crops.length < 3) crops = list.slice(0, 3);
+      const matches = recommendCropsByLocation({
+        state: data.state, district: data.district,
+        soilType: data.soilType, season: data.season, water: data.water,
+      });
+      crops = matches.map(m => m.name).slice(0, 6);
       ctx = `${data.state}/${data.district}, ${data.season} season, ${data.soilType} soil, ${data.water} water`;
     }
     const reasons = await reasonForCrops(crops, ctx);

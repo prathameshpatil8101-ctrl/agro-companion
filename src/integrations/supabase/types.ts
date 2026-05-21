@@ -14,6 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      crop_reminders: {
+        Row: {
+          created_at: string
+          crop_name: string
+          done: boolean
+          due_date: string
+          id: string
+          plot_id: string | null
+          task: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crop_name: string
+          done?: boolean
+          due_date: string
+          id?: string
+          plot_id?: string | null
+          task: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crop_name?: string
+          done?: boolean
+          due_date?: string
+          id?: string
+          plot_id?: string | null
+          task?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crop_reminders_plot_id_fkey"
+            columns: ["plot_id"]
+            isOneToOne: false
+            referencedRelation: "farm_plots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      farm_plots: {
+        Row: {
+          area_acres: number | null
+          created_at: string
+          current_crop: string | null
+          id: string
+          name: string
+          notes: string | null
+          soil_type: string | null
+          sowing_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          area_acres?: number | null
+          created_at?: string
+          current_crop?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          soil_type?: string | null
+          sowing_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          area_acres?: number | null
+          created_at?: string
+          current_crop?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          soil_type?: string | null
+          sowing_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           created_at: string
@@ -38,6 +118,90 @@ export type Database = {
           message?: string
           name?: string
           rating?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          district: string | null
+          id: string
+          mobile: string | null
+          preferred_language: string | null
+          primary_crops: string[] | null
+          state: string | null
+          total_land_acres: number | null
+          updated_at: string
+          user_id: string
+          village: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          district?: string | null
+          id?: string
+          mobile?: string | null
+          preferred_language?: string | null
+          primary_crops?: string[] | null
+          state?: string | null
+          total_land_acres?: number | null
+          updated_at?: string
+          user_id: string
+          village?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          district?: string | null
+          id?: string
+          mobile?: string | null
+          preferred_language?: string | null
+          primary_crops?: string[] | null
+          state?: string | null
+          total_land_acres?: number | null
+          updated_at?: string
+          user_id?: string
+          village?: string | null
+        }
+        Relationships: []
+      }
+      saved_diagnoses: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          crop_name: string | null
+          disease_name: string | null
+          id: string
+          image_url: string | null
+          organic_treatment: string | null
+          symptoms: string | null
+          treatment: string | null
+          user_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          crop_name?: string | null
+          disease_name?: string | null
+          id?: string
+          image_url?: string | null
+          organic_treatment?: string | null
+          symptoms?: string | null
+          treatment?: string | null
+          user_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          crop_name?: string | null
+          disease_name?: string | null
+          id?: string
+          image_url?: string | null
+          organic_treatment?: string | null
+          symptoms?: string | null
+          treatment?: string | null
+          user_id?: string
         }
         Relationships: []
       }

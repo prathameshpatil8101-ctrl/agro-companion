@@ -17,14 +17,18 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const FEATURES = [
+type Feature = {
+  to: string; icon: typeof Leaf; titleKey: string; descKey: string;
+  span?: string; featured?: boolean;
+};
+const FEATURES: Feature[] = [
   { to: "/crop-recommendation", icon: Leaf, titleKey: "Crop Recommendation", descKey: "Crop Recommendation desc", span: "md:col-span-2 md:row-span-2", featured: true },
   { to: "/disease-diagnosis", icon: Bug, titleKey: "Disease Diagnosis", descKey: "Disease Diagnosis desc" },
   { to: "/weather", icon: CloudSun, titleKey: "Weather", descKey: "Weather desc" },
   { to: "/market-prices", icon: LineChart, titleKey: "Market Prices", descKey: "Market Prices desc", span: "md:col-span-2" },
   { to: "/organic-farming", icon: Flower2, titleKey: "Organic Farming", descKey: "Organic Farming desc" },
   { to: "/ai-chat", icon: MessageCircle, titleKey: "AI Assistant", descKey: "AI Assistant desc" },
-] as const;
+];
 
 function Home() {
   const { t } = useTranslation();
@@ -91,7 +95,7 @@ function Home() {
           {FEATURES.map(f => (
             <Link
               key={f.to}
-              to={f.to}
+              to={f.to as any}
               className={`group relative overflow-hidden rounded-2xl border border-border bg-card p-6 hover:shadow-elegant transition-all hover:-translate-y-0.5 flex flex-col justify-between ${f.span ?? ""}`}
             >
               {f.featured && <div className="absolute inset-0 dot-bg opacity-40 pointer-events-none" />}

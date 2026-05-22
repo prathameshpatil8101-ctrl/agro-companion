@@ -51,14 +51,40 @@ function Disease() {
           )}
           {m.data && (
             <div className="rounded-2xl border border-border bg-card p-6 space-y-3">
+              {m.data.isPlant === false ? (
+                <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm">
+                  <div className="font-semibold text-amber-900">This doesn't look like a plant leaf.</div>
+                  <p className="mt-1 text-amber-800">{m.data.photoTips}</p>
+                </div>
+              ) : (m.data.confidence ?? 0) < 60 ? (
+                <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm">
+                  <div className="font-semibold text-amber-900">Low confidence ({m.data.confidence}%) — please retry</div>
+                  <p className="mt-1 text-amber-800">{m.data.photoTips}</p>
+                </div>
+              ) : null}
+              {m.data.isPlant !== false && (
+                <>
               <div className="flex items-center gap-2 text-destructive font-semibold"><AlertTriangle className="h-5 w-5" /> {m.data.diseaseName}</div>
-              <p className="text-sm text-muted-foreground">Crop: <span className="font-medium text-foreground">{m.data.cropName}</span></p>
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Crop:</span>
+                <span className="font-medium">{m.data.cropName}</span>
+                <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-semibold">
+                  {m.data.confidence}% confidence
+                </span>
+              </div>
+              {m.data.alternatives?.length > 0 && (
+                <div className="text-xs text-muted-foreground">
+                  Other possibilities: {m.data.alternatives.join(" · ")}
+                </div>
+              )}
               <Section title="Symptoms" body={m.data.symptoms} />
               <Section title="Cause" body={m.data.cause} />
               <Section title="Recommended Medicine" body={m.data.medicine} />
               <Section title="Treatment" body={m.data.treatment} />
               <Section title="Prevention" body={m.data.prevention} />
               <Section title="Organic Option" body={m.data.organicTreatment} highlight />
+                </>
+              )}
             </div>
           )}
           {!m.data && !m.isPending && (

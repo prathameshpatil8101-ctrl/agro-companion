@@ -1,7 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
-import { Sprout, Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Leaf, Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const LINKS = [
@@ -19,22 +19,32 @@ export function Navbar() {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   return (
-    <header className="sticky top-0 z-50 glass-card border-b border-border">
+    <header className={`sticky top-0 z-50 transition-all ${scrolled ? "glass-card border-b border-border" : "bg-transparent"}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary" style={{ fontFamily: "'Playfair Display', serif" }}>
-          <span className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-primary text-primary-foreground">
-            <Sprout className="h-5 w-5" />
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <span className="relative inline-flex items-center justify-center h-9 w-9 rounded-xl bg-foreground text-background shadow-soft">
+            <Leaf className="h-4.5 w-4.5" strokeWidth={2.2} />
           </span>
-          AgroVision AI
+          <span className="flex flex-col leading-none">
+            <span className="text-[15px] font-semibold tracking-tight">AgroVision</span>
+            <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Intelligence</span>
+          </span>
         </Link>
         <nav className="hidden lg:flex items-center gap-1">
           {LINKS.map(l => (
             <Link
               key={l.to}
               to={l.to}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                pathname === l.to ? "bg-primary/10 text-primary" : "text-foreground/70 hover:text-primary hover:bg-accent"
+              className={`px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors ${
+                pathname === l.to ? "bg-foreground text-background" : "text-foreground/70 hover:text-foreground"
               }`}
             >
               {t(l.key)}

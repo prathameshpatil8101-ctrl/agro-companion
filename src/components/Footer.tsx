@@ -1,30 +1,46 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
-import { Sprout } from "lucide-react";
+import { Leaf } from "lucide-react";
 
 export function Footer() {
   const { t } = useTranslation();
   return (
-    <footer className="border-t border-border bg-secondary/30 mt-16">
-      <div className="mx-auto max-w-7xl px-6 py-10 grid sm:grid-cols-3 gap-8">
-        <div>
-          <div className="flex items-center gap-2 font-bold text-lg text-primary" style={{ fontFamily: "'Playfair Display', serif" }}>
-            <Sprout className="h-5 w-5" /> AgroVision AI
+    <footer className="mt-24 border-t border-border bg-[var(--gradient-subtle)]">
+      <div className="mx-auto max-w-7xl px-6 py-14 grid md:grid-cols-12 gap-10">
+        <div className="md:col-span-5">
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-foreground text-background">
+              <Leaf className="h-4 w-4" />
+            </span>
+            <span className="font-semibold tracking-tight">AgroVision Intelligence</span>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">{t("About desc")}</p>
+          <p className="mt-4 text-sm text-muted-foreground max-w-sm leading-relaxed">{t("About desc")}</p>
+          <div className="mt-5 flex flex-wrap gap-1.5 text-[11px] text-muted-foreground">
+            {["Open-Meteo", "data.gov.in", "ICAR", "Lovable AI"].map(s => (
+              <span key={s} className="rounded-full border border-border px-2 py-0.5">{s}</span>
+            ))}
+          </div>
         </div>
-        <div>
-          <h4 className="font-semibold mb-2">{t("Quick Links")}</h4>
-          <ul className="space-y-1 text-sm text-muted-foreground">
+        <div className="md:col-span-3">
+          <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t("Quick Links")}</h4>
+          <ul className="mt-4 space-y-2 text-sm">
             <li><Link to="/crop-recommendation" className="hover:text-primary">{t("Crop Recommendation")}</Link></li>
             <li><Link to="/disease-diagnosis" className="hover:text-primary">{t("Disease Diagnosis")}</Link></li>
             <li><Link to="/market-prices" className="hover:text-primary">{t("Market Prices")}</Link></li>
-            <li><Link to="/ai-chat" className="hover:text-primary">{t("AI Assistant")}</Link></li>
+            <li><Link to="/weather" className="hover:text-primary">{t("Weather")}</Link></li>
           </ul>
         </div>
-        <div>
-          <h4 className="font-semibold mb-2">{t("About")}</h4>
-          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} AgroVision AI. {t("All rights reserved")}</p>
+        <div className="md:col-span-4">
+          <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t("About")}</h4>
+          <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+            Built for Indian farmers. Maharashtra-first datasets, English / हिन्दी / मराठी.
+          </p>
+        </div>
+      </div>
+      <div className="border-t border-border">
+        <div className="mx-auto max-w-7xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+          <span>© {new Date().getFullYear()} AgroVision Intelligence. {t("All rights reserved")}</span>
+          <span className="font-mono">v1.0 · Maharashtra Edition</span>
         </div>
       </div>
     </footer>

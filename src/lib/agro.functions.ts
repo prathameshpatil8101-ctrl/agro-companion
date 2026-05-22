@@ -82,18 +82,35 @@ export const diagnoseDisease = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     try {
       const content = await callAI([
-        { role: "system", content: "You are an expert plant pathologist for Indian crops. Always reply with valid JSON only." },
+        { role: "system", content: "You are an expert plant pathologist for Indian crops (Maharashtra focus). Be honest about uncertainty. Always reply with valid JSON only." },
         { role: "user", content: [
-          { type: "text", text: `Analyze this plant/leaf image. Respond ONLY in this exact JSON format:\n{"cropName":"...","diseaseName":"...","symptoms":"...","cause":"...","medicine":"...","treatment":"...","prevention":"...","organicTreatment":"..."}` },
+          { type: "text", text: `Look at this image. First decide: is this a clear photo of a plant or leaf? If NOT (e.g. selfie, screenshot, blurry, dark, non-plant), set isPlant=false and confidence=0 and explain in symptoms what to retake. If YES, identify the most likely disease for an Indian crop. Provide a confidence 0-100 (be honest — give <60 if photo is blurry, partial, or ambiguous). Reply ONLY as this exact JSON:\n{"isPlant":true|false,"cropName":"...","diseaseName":"...","confidence":0-100,"alternatives":["...","..."],"symptoms":"...","cause":"...","medicine":"...","treatment":"...","prevention":"...","organicTreatment":"...","photoTips":"..."}` },
           { type: "image_url", image_url: { url: data.imageBase64 } },
         ]},
       ], "google/gemini-2.5-flash");
       const m = content.match(/\{[\s\S]*\}/);
-      if (m) return JSON.parse(m[0]);
+      if (m) {
+        const parsed = JSON.parse(m[0]);
+        return {
+          isPlant: parsed.isPlant !== false,
+          cropName: parsed.cropName || "Unknown",
+          diseaseName: parsed.diseaseName || "Unidentified",
+          confidence: Math.max(0, Math.min(100, Number(parsed.confidence) || 0)),
+          alternatives: Array.isArray(parsed.alternatives) ? parsed.alternatives.slice(0, 4) : [],
+          symptoms: parsed.symptoms || "",
+          cause: parsed.cause || "",
+          medicine: parsed.medicine || "",
+          treatment: parsed.treatment || "",
+          prevention: parsed.prevention || "",
+          organicTreatment: parsed.organicTreatment || "",
+          photoTips: parsed.photoTips || "Take a sharp daylight close-up of a single affected leaf, filling most of the frame. Avoid shadows and blur.",
+        };
+      }
     } catch (e) {
       console.error("disease AI failed", e);
     }
-    return pickFallbackDisease();
+    const fb = pickFallbackDisease();
+    return { ...fb, isPlant: true, confidence: 40, alternatives: [], photoTips: "We couldn't read this image. Try a sharp daylight close-up of one affected leaf." };
   });
 
 const weatherInput = z.object({ location: z.string().min(1) });
@@ -101,9 +118,25 @@ const weatherInput = z.object({ location: z.string().min(1) });
 export const getWeather = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => weatherInput.parse(d))
   .handler(async ({ data }) => {
-    const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.location)}&count=1`);
-    const gj = await geo.json();
-    const place = gj?.results?.[0];
+    // detect "lat,lng" form for GPS lookup
+    let place: any = null;
+    const latlng = data.location.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if (latlng) {
+      const lat = Number(latlng[1]); const lon = Number(latlng[2]);
+      const r = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=en`);
+      const j = await r.json();
+      place = j?.results?.[0] || { name: `${lat.toFixed(2)}, ${lon.toFixed(2)}`, latitude: lat, longitude: lon, country_code: "IN", admin1: "" };
+    } else {
+      // India-scoped search first; fall back to global if no match
+      const geoIn = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.location)}&count=5&countryCode=IN&language=en`);
+      const gjIn = await geoIn.json();
+      place = gjIn?.results?.[0];
+      if (!place) {
+        const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.location)}&count=1`);
+        const gj = await geo.json();
+        place = gj?.results?.[0];
+      }
+    }
     if (!place) throw new Error("Location not found");
     const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,precipitation&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FKolkata&forecast_days=7`);
     const wj = await w.json();
@@ -113,13 +146,23 @@ export const getWeather = createServerFn({ method: "POST" })
       61: "Light rain", 63: "Rain", 65: "Heavy rain", 71: "Light snow", 73: "Snow",
       80: "Showers", 81: "Showers", 82: "Heavy showers", 95: "Thunderstorm", 96: "Storm", 99: "Storm",
     };
+    const advisory: string[] = [];
+    const cur = wj.current;
+    if (cur.precipitation > 1) advisory.push("Rain now — postpone spraying and irrigation.");
+    if (cur.wind_speed_10m > 25) advisory.push("Strong wind — avoid pesticide spraying today.");
+    if (cur.temperature_2m > 38) advisory.push("Heat stress — irrigate early morning or evening.");
+    const rainNext = (wj.daily?.precipitation_probability_max ?? []).slice(0, 3).some((p: number) => (p ?? 0) > 60);
+    if (rainNext) advisory.push("Rain likely in next 3 days — plan harvest / fertilizer accordingly.");
+    if (!advisory.length) advisory.push("Good window for routine field work and spraying.");
+
     return {
-      location: `${place.name}, ${place.country_code || ""}`,
+      location: [place.name, place.admin1, place.country_code].filter(Boolean).join(", "),
       temperature: wj.current.temperature_2m,
       humidity: wj.current.relative_humidity_2m,
       windSpeed: wj.current.wind_speed_10m,
       precipitation: wj.current.precipitation,
       condition: codeMap[wj.current.weather_code] || "—",
+      advisory,
       forecast: wj.daily.time.map((t: string, i: number) => ({
         day: new Date(t).toLocaleDateString("en-IN", { weekday: "short" }),
         high: wj.daily.temperature_2m_max[i],

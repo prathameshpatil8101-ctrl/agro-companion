@@ -7,6 +7,10 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "../integrations/supabase/client";
+import { Toaster } from "../components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { Layout } from "../components/Layout";
@@ -114,9 +118,25 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Layout>
-        <Outlet />
-      </Layout>
+      <AuthBoundary>
+        <Layout>
+          <Outlet />
+        </Layout>
+        <Toaster richColors position="top-right" />
+      </AuthBoundary>
     </QueryClientProvider>
   );
+}
+
+function AuthBoundary({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const qc = useQueryClient();
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      router.invalidate();
+      qc.invalidateQueries();
+    });
+    return () => subscription.unsubscribe();
+  }, [router, qc]);
+  return <>{children}</>;
 }

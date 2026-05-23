@@ -22,7 +22,7 @@ const WATER = ["Low", "Medium", "High"];
 function CropRec() {
   const [tab, setTab] = useState<"simple" | "advanced">("simple");
   const [simple, setSimple] = useState({ state: "Maharashtra", district: "Pune", village: "", soilType: "Black", season: "Kharif", water: "Medium" });
-  const [adv, setAdv] = useState({ N: 90, P: 42, K: 43, ph: 6.5, temperature: 25, humidity: 60, rainfall: 100, state: "Maharashtra" });
+  const [adv, setAdv] = useState({ N: 90, P: 42, K: 43, ph: 6.5, temperature: 25, humidity: 60, rainfall: 100 });
   const fn = useServerFn(recommendCrops);
   const m = useMutation({ mutationFn: (input: any) => fn({ data: input }) });
 
@@ -46,14 +46,24 @@ function CropRec() {
               <Field label="Water Availability"><Select value={simple.water} options={WATER} onChange={v => setSimple({ ...simple, water: v })} /></Field>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-3 gap-4">
-              {(["N", "P", "K", "ph", "temperature", "humidity", "rainfall"] as const).map(k => (
-                <Field key={k} label={k.toUpperCase()}>
-                  <Input type="number" value={String((adv as any)[k])} onChange={v => setAdv({ ...adv, [k]: Number(v) })} />
-                </Field>
-              ))}
-              <Field label="State"><Select value={adv.state} options={STATES} onChange={v => setAdv({ ...adv, state: v })} /></Field>
-            </div>
+            <>
+              <p className="text-sm text-muted-foreground mb-4">Enter your soil-test values. No location needed — pure agronomic inputs.</p>
+              <div className="grid sm:grid-cols-3 gap-4">
+                {([
+                  { k: "N", label: "Nitrogen (N) — kg/ha" },
+                  { k: "P", label: "Phosphorus (P) — kg/ha" },
+                  { k: "K", label: "Potassium (K) — kg/ha" },
+                  { k: "ph", label: "Soil pH (0–14)" },
+                  { k: "temperature", label: "Temperature (°C)" },
+                  { k: "humidity", label: "Humidity (%)" },
+                  { k: "rainfall", label: "Rainfall (mm)" },
+                ] as const).map(({ k, label }) => (
+                  <Field key={k} label={label}>
+                    <Input type="number" value={String((adv as any)[k])} onChange={v => setAdv({ ...adv, [k]: Number(v) })} />
+                  </Field>
+                ))}
+              </div>
+            </>
           )}
 
           <button

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
-import { Leaf } from "lucide-react";
+import { AppLogo } from "./AppLogo";
 
 export function Footer() {
   const { t } = useTranslation();
@@ -9,9 +9,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-14 grid md:grid-cols-12 gap-10">
         <div className="md:col-span-5">
           <div className="flex items-center gap-2.5">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-foreground text-background">
-              <Leaf className="h-4 w-4" />
-            </span>
+            <AppLogo size={36} />
             <span className="font-semibold tracking-tight">AgroVision Intelligence</span>
           </div>
           <p className="mt-4 text-sm text-muted-foreground max-w-sm leading-relaxed">{t("About desc")}</p>

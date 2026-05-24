@@ -20,8 +20,14 @@ import { Route as DiseaseDiagnosisRouteImport } from './routes/disease-diagnosis
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CropRecommendationRouteImport } from './routes/crop-recommendation'
 import { Route as AiChatRouteImport } from './routes/ai-chat'
+import { Route as SchemesRouteImport } from './routes/schemes'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SchemesRoute = SchemesRouteImport.update({
+  id: '/schemes',
+  path: '/schemes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
   path: '/weather',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/market-prices': typeof MarketPricesRoute
   '/organic-farming': typeof OrganicFarmingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/schemes': typeof SchemesRoute
   '/signup': typeof SignupRoute
   '/weather': typeof WeatherRoute
 }
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/market-prices': typeof MarketPricesRoute
   '/organic-farming': typeof OrganicFarmingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/schemes': typeof SchemesRoute
   '/signup': typeof SignupRoute
   '/weather': typeof WeatherRoute
 }
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/market-prices': typeof MarketPricesRoute
   '/organic-farming': typeof OrganicFarmingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/schemes': typeof SchemesRoute
   '/signup': typeof SignupRoute
   '/weather': typeof WeatherRoute
 }
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/market-prices'
     | '/organic-farming'
     | '/reset-password'
+    | '/schemes'
     | '/signup'
     | '/weather'
   fileRoutesByTo: FileRoutesByTo
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/market-prices'
     | '/organic-farming'
     | '/reset-password'
+    | '/schemes'
     | '/signup'
     | '/weather'
   id:
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/market-prices'
     | '/organic-farming'
     | '/reset-password'
+    | '/schemes'
     | '/signup'
     | '/weather'
   fileRoutesById: FileRoutesById
@@ -188,6 +200,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/schemes': {
+      id: '/schemes'
+      path: '/schemes'
+      fullPath: '/schemes'
+      preLoaderRoute: typeof SchemesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/weather': {
       id: '/weather'
       path: '/weather'
@@ -286,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketPricesRoute: MarketPricesRoute,
   OrganicFarmingRoute: OrganicFarmingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SchemesRoute: SchemesRoute,
   SignupRoute: SignupRoute,
   WeatherRoute: WeatherRoute,
 }

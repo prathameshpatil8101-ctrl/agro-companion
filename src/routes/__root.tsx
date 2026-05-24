@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../integrations/supabase/client";
 import { Toaster } from "../components/ui/sonner";
+import "../lib/i18n"; // initialise i18n before any component uses useTranslation
 
 import appCss from "../styles.css?url";
 import { Layout } from "../components/Layout";
@@ -77,14 +78,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "AgroVision AI — Smart Farming for Indian Farmers" },
+      { name: "description", content: "AI-powered crop recommendations, disease detection, weather forecasts and live mandi prices for Indian farmers." },
+      { name: "author", content: "AgroVision AI" },
+      { property: "og:title", content: "AgroVision AI — Smart Farming for Indian Farmers" },
+      { property: "og:description", content: "AI-powered crop recommendations, disease detection, weather forecasts and live mandi prices for Indian farmers." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@AgroVisionAI" },
     ],
     links: [
       {

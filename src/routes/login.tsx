@@ -33,7 +33,14 @@ function LoginPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      if (error.message.toLowerCase().includes("email not confirmed") || error.message.toLowerCase().includes("not verified")) {
+        toast.error("Please verify your email first. Check your inbox for the verification link, then try signing in again.");
+      } else {
+        toast.error(error.message);
+      }
+      return;
+    }
     toast.success("Welcome back!");
     nav({ to: redirectTo as any });
   };

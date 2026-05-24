@@ -57,18 +57,20 @@ export const recommendCrops = createServerFn({ method: "POST" })
     let crops: string[] = [];
     let ctx = "";
     if (data.method === "advanced" && data.N != null) {
-      crops = recommendFromCsv({
+      // Advanced: return exactly 1 best crop from dataset
+      const bestCrop = recommendFromCsv({
         N: data.N!, P: data.P!, K: data.K!,
         temperature: data.temperature ?? 25, humidity: data.humidity ?? 60,
         ph: data.ph ?? 6.5, rainfall: data.rainfall ?? 100,
       });
+      crops = bestCrop.slice(0, 1); // exactly 1 best match
       ctx = `N=${data.N}, P=${data.P}, K=${data.K}, pH=${data.ph}, temp=${data.temperature}°C, humidity=${data.humidity}%, rainfall=${data.rainfall}mm in ${data.state || "India"}`;
     } else {
       const matches = recommendCropsByLocation({
         state: data.state, district: data.district,
         soilType: data.soilType, season: data.season, water: data.water,
       });
-      crops = matches.map(m => m.name).slice(0, 6);
+      crops = matches.map(m => m.name).slice(0, 3); // exactly 3 crops for simple
       ctx = `${data.state}/${data.district}, ${data.season} season, ${data.soilType} soil, ${data.water} water`;
     }
     const reasons = await reasonForCrops(crops, ctx);
@@ -115,26 +117,94 @@ export const diagnoseDisease = createServerFn({ method: "POST" })
 
 const weatherInput = z.object({ location: z.string().min(1) });
 
+// Pre-mapped coordinates for all 36 Maharashtra districts + common cities
+const MAHARASHTRA_COORDS: Record<string, { lat: number; lon: number; name: string }> = {
+  "pune": { lat: 18.5204, lon: 73.8567, name: "Pune, Maharashtra" },
+  "mumbai": { lat: 19.0760, lon: 72.8777, name: "Mumbai, Maharashtra" },
+  "mumbai city": { lat: 18.9388, lon: 72.8354, name: "Mumbai City, Maharashtra" },
+  "mumbai suburban": { lat: 19.1716, lon: 72.9498, name: "Mumbai Suburban, Maharashtra" },
+  "thane": { lat: 19.2183, lon: 72.9781, name: "Thane, Maharashtra" },
+  "nashik": { lat: 19.9975, lon: 73.7898, name: "Nashik, Maharashtra" },
+  "nagpur": { lat: 21.1458, lon: 79.0882, name: "Nagpur, Maharashtra" },
+  "aurangabad": { lat: 19.8762, lon: 75.3433, name: "Aurangabad (Chhatrapati Sambhajinagar), Maharashtra" },
+  "solapur": { lat: 17.6805, lon: 75.9064, name: "Solapur, Maharashtra" },
+  "kolhapur": { lat: 16.7050, lon: 74.2433, name: "Kolhapur, Maharashtra" },
+  "amravati": { lat: 20.9374, lon: 77.7796, name: "Amravati, Maharashtra" },
+  "ahmednagar": { lat: 19.0952, lon: 74.7480, name: "Ahmednagar, Maharashtra" },
+  "latur": { lat: 18.4088, lon: 76.5604, name: "Latur, Maharashtra" },
+  "dhule": { lat: 20.9042, lon: 74.7749, name: "Dhule, Maharashtra" },
+  "jalgaon": { lat: 21.0077, lon: 75.5626, name: "Jalgaon, Maharashtra" },
+  "sangli": { lat: 16.8524, lon: 74.5815, name: "Sangli, Maharashtra" },
+  "satara": { lat: 17.6805, lon: 74.0183, name: "Satara, Maharashtra" },
+  "raigad": { lat: 18.5122, lon: 73.1810, name: "Raigad, Maharashtra" },
+  "ratnagiri": { lat: 16.9944, lon: 73.3000, name: "Ratnagiri, Maharashtra" },
+  "sindhudurg": { lat: 16.3500, lon: 73.5667, name: "Sindhudurg, Maharashtra" },
+  "wardha": { lat: 20.7453, lon: 78.5997, name: "Wardha, Maharashtra" },
+  "yavatmal": { lat: 20.3888, lon: 78.1204, name: "Yavatmal, Maharashtra" },
+  "akola": { lat: 20.7059, lon: 77.0001, name: "Akola, Maharashtra" },
+  "washim": { lat: 20.1118, lon: 77.1460, name: "Washim, Maharashtra" },
+  "buldana": { lat: 20.5292, lon: 76.1842, name: "Buldhana, Maharashtra" },
+  "buldhana": { lat: 20.5292, lon: 76.1842, name: "Buldhana, Maharashtra" },
+  "jalna": { lat: 19.8347, lon: 75.8816, name: "Jalna, Maharashtra" },
+  "beed": { lat: 18.9891, lon: 75.7601, name: "Beed, Maharashtra" },
+  "nanded": { lat: 19.1383, lon: 77.3210, name: "Nanded, Maharashtra" },
+  "osmanabad": { lat: 18.1860, lon: 76.0386, name: "Dharashiv (Osmanabad), Maharashtra" },
+  "dharashiv": { lat: 18.1860, lon: 76.0386, name: "Dharashiv, Maharashtra" },
+  "parbhani": { lat: 19.2704, lon: 76.7749, name: "Parbhani, Maharashtra" },
+  "hingoli": { lat: 19.7178, lon: 77.1476, name: "Hingoli, Maharashtra" },
+  "nandurbar": { lat: 21.3681, lon: 74.2430, name: "Nandurbar, Maharashtra" },
+  "palghar": { lat: 19.6967, lon: 72.7697, name: "Palghar, Maharashtra" },
+  "chandrapur": { lat: 19.9615, lon: 79.2961, name: "Chandrapur, Maharashtra" },
+  "gadchiroli": { lat: 20.1809, lon: 80.0012, name: "Gadchiroli, Maharashtra" },
+  "gondia": { lat: 21.4624, lon: 80.1963, name: "Gondia, Maharashtra" },
+  "bhandara": { lat: 21.1661, lon: 79.6486, name: "Bhandara, Maharashtra" },
+};
+
+function findMaharashtraCoords(location: string): { lat: number; lon: number; name: string } | null {
+  const key = location.toLowerCase().trim();
+  // Exact match
+  if (MAHARASHTRA_COORDS[key]) return MAHARASHTRA_COORDS[key];
+  // Partial match
+  for (const [k, v] of Object.entries(MAHARASHTRA_COORDS)) {
+    if (key.includes(k) || k.includes(key)) return v;
+  }
+  return null;
+}
+
 export const getWeather = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => weatherInput.parse(d))
   .handler(async ({ data }) => {
-    // detect "lat,lng" form for GPS lookup
     let place: any = null;
     const latlng = data.location.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
     if (latlng) {
       const lat = Number(latlng[1]); const lon = Number(latlng[2]);
-      const r = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=en`);
-      const j = await r.json();
-      place = j?.results?.[0] || { name: `${lat.toFixed(2)}, ${lon.toFixed(2)}`, latitude: lat, longitude: lon, country_code: "IN", admin1: "" };
+      try {
+        const r = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=en`);
+        const j = await r.json();
+        place = j?.results?.[0] || { name: `${lat.toFixed(2)}, ${lon.toFixed(2)}`, latitude: lat, longitude: lon, country_code: "IN", admin1: "" };
+      } catch {
+        place = { name: `${lat.toFixed(2)}, ${lon.toFixed(2)}`, latitude: lat, longitude: lon, country_code: "IN", admin1: "" };
+      }
     } else {
-      // India-scoped search first; fall back to global if no match
-      const geoIn = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.location)}&count=5&countryCode=IN&language=en`);
-      const gjIn = await geoIn.json();
-      place = gjIn?.results?.[0];
-      if (!place) {
-        const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.location)}&count=1`);
-        const gj = await geo.json();
-        place = gj?.results?.[0];
+      // 1. Try our hardcoded Maharashtra district map first
+      const mh = findMaharashtraCoords(data.location);
+      if (mh) {
+        place = { name: mh.name, latitude: mh.lat, longitude: mh.lon, country_code: "IN", admin1: "Maharashtra" };
+      } else {
+        // 2. Try Open-Meteo geocoding with India scope
+        try {
+          const geoIn = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.location)}&count=5&countryCode=IN&language=en`);
+          const gjIn = await geoIn.json();
+          place = gjIn?.results?.[0];
+        } catch { /* ignore */ }
+        // 3. Global fallback
+        if (!place) {
+          try {
+            const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.location)}&count=1`);
+            const gj = await geo.json();
+            place = gj?.results?.[0];
+          } catch { /* ignore */ }
+        }
       }
     }
     if (!place) throw new Error("Location not found");

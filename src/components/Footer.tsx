@@ -14,7 +14,7 @@ export function Footer() {
           </div>
           <p className="mt-4 text-sm text-muted-foreground max-w-sm leading-relaxed">{t("About desc")}</p>
           <div className="mt-5 flex flex-wrap gap-1.5 text-[11px] text-muted-foreground">
-            {["Open-Meteo", "data.gov.in", "ICAR", "Lovable AI"].map(s => (
+            {["Open-Meteo", "data.gov.in", "ICAR", "NIC eNAM"].map(s => (
               <span key={s} className="rounded-full border border-border px-2 py-0.5">{s}</span>
             ))}
           </div>
@@ -26,6 +26,7 @@ export function Footer() {
             <li><Link to="/disease-diagnosis" className="hover:text-primary">{t("Disease Diagnosis")}</Link></li>
             <li><Link to="/market-prices" className="hover:text-primary">{t("Market Prices")}</Link></li>
             <li><Link to="/weather" className="hover:text-primary">{t("Weather")}</Link></li>
+            <li><Link to="/schemes" className="hover:text-primary">Govt Schemes</Link></li>
           </ul>
         </div>
         <div className="md:col-span-4">

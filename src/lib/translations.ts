@@ -1,5 +1,7 @@
 export const resources = {
   en: { translation: {
+    "Govt Schemes": "Govt Schemes",
+    "Government Schemes for Farmers": "Government Schemes for Farmers",
     "Home": "Home",
     "Crop Recommendation": "Crop Recommendation",
     "Disease Diagnosis": "Disease Diagnosis",
@@ -71,6 +73,8 @@ export const resources = {
     "Low": "Low", "Medium": "Medium", "High": "High",
   }},
   hi: { translation: {
+    "Govt Schemes": "सरकारी योजनाएं",
+    "Government Schemes for Farmers": "किसानों के लिए सरकारी योजनाएं",
     "Home": "होम", "Crop Recommendation": "फ़सल की सलाह", "Disease Diagnosis": "रोग निदान",
     "Market Prices": "बाज़ार भाव", "Weather": "मौसम", "AI Assistant": "एआई सहायक",
     "Organic Farming": "जैविक खेती", "Feedback": "प्रतिक्रिया",
@@ -128,6 +132,8 @@ export const resources = {
     "Low": "कम", "Medium": "मध्यम", "High": "अधिक",
   }},
   mr: { translation: {
+    "Govt Schemes": "सरकारी योजना",
+    "Government Schemes for Farmers": "शेतकऱ्यांसाठी सरकारी योजना",
     "Home": "मुख्यपृष्ठ", "Crop Recommendation": "पीक शिफारस", "Disease Diagnosis": "रोग निदान",
     "Market Prices": "बाजार भाव", "Weather": "हवामान", "AI Assistant": "एआय सहाय्यक",
     "Organic Farming": "सेंद्रिय शेती", "Feedback": "अभिप्राय",

@@ -25,7 +25,7 @@ function SignupPage() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (password.length < 8) return toast.error("Password must be at least 8 characters");
+    if (password.length < 6) return toast.error("Password must be at least 6 characters");
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email, password,
@@ -33,8 +33,10 @@ function SignupPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    if (data.session) { toast.success("Account created!"); nav({ to: "/dashboard" }); }
-    else toast.success("Check your email to verify your account.");
+    // If Supabase auto-confirms (no email confirm required) — go straight to dashboard
+    if (data.session) { toast.success("Account created! Welcome to AgroVision."); nav({ to: "/dashboard" }); return; }
+    // If email confirmation is enabled, inform the user clearly
+    toast.success("Account created! Please check your email and click the verification link, then come back and sign in.");
   };
 
   const onGoogle = async () => {
@@ -50,7 +52,7 @@ function SignupPage() {
     <form onSubmit={onSubmit} className="space-y-3">
       <LabeledInput label="Full name" value={name} onChange={setName} required />
       <LabeledInput label="Email" type="email" value={email} onChange={setEmail} required />
-      <LabeledInput label="Password (8+ characters)" type="password" value={password} onChange={setPassword} required />
+      <LabeledInput label="Password (6+ characters)" type="password" value={password} onChange={setPassword} required />
       <button type="submit" disabled={loading} className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-foreground text-background px-4 py-2.5 text-sm font-medium hover:opacity-90 transition disabled:opacity-60">
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />} Create account
       </button>

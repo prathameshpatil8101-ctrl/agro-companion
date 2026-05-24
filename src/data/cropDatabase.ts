@@ -221,3 +221,65 @@ export function districtsForState(state: string): string[] {
   if (state === "Maharashtra") return MAHARASHTRA_DISTRICTS;
   return Object.keys(otherStates[state] || {});
 }
+
+// Expanded state coverage — added in v2
+const _ext: Record<string, Record<string, DistrictProfile>> = {
+  "Bihar": {
+    "Patna":    { soils: ["Alluvial"], primaryCrops: ["Rice", "Wheat", "Maize", "Pulses", "Vegetables", "Potato"] },
+    "Gaya":     { soils: ["Alluvial", "Red"], primaryCrops: ["Wheat", "Rice", "Maize", "Pulses", "Gram"] },
+    "Muzaffarpur": { soils: ["Alluvial"], primaryCrops: ["Litchi", "Banana", "Vegetables", "Wheat", "Maize"] },
+    "Bhagalpur":{ soils: ["Alluvial"], primaryCrops: ["Rice", "Wheat", "Maize", "Mustard", "Vegetables"] },
+  },
+  "West Bengal": {
+    "Kolkata":  { soils: ["Alluvial"], primaryCrops: ["Rice", "Vegetables", "Jute", "Potato", "Mustard"] },
+    "Murshidabad": { soils: ["Alluvial"], primaryCrops: ["Rice", "Jute", "Mustard", "Vegetables", "Potato"] },
+    "Bardhaman":{ soils: ["Alluvial"], primaryCrops: ["Rice", "Potato", "Mustard", "Vegetables", "Wheat"] },
+    "Cooch Behar": { soils: ["Alluvial"], primaryCrops: ["Rice", "Jute", "Vegetables", "Maize"] },
+  },
+  "Haryana": {
+    "Karnal":   { soils: ["Alluvial"], primaryCrops: ["Wheat", "Rice", "Sugarcane", "Mustard", "Barley"] },
+    "Hisar":    { soils: ["Alluvial", "Sandy"], primaryCrops: ["Wheat", "Cotton", "Bajra", "Mustard", "Gram"] },
+    "Ambala":   { soils: ["Alluvial"], primaryCrops: ["Wheat", "Rice", "Sugarcane", "Mustard"] },
+    "Sonipat":  { soils: ["Alluvial"], primaryCrops: ["Wheat", "Rice", "Vegetables", "Mustard"] },
+  },
+  "Telangana": {
+    "Hyderabad":{ soils: ["Red", "Black"], primaryCrops: ["Rice", "Cotton", "Maize", "Tur", "Vegetables", "Chilli"] },
+    "Warangal": { soils: ["Red", "Black"], primaryCrops: ["Cotton", "Paddy", "Maize", "Tur", "Jowar"] },
+    "Nizamabad":{ soils: ["Red", "Black"], primaryCrops: ["Rice", "Maize", "Cotton", "Turmeric", "Tur"] },
+    "Nalgonda": { soils: ["Red", "Black"], primaryCrops: ["Cotton", "Rice", "Jowar", "Groundnut", "Tur"] },
+  },
+  "Odisha": {
+    "Bhubaneswar": { soils: ["Alluvial", "Red"], primaryCrops: ["Rice", "Maize", "Vegetables", "Pulses"] },
+    "Cuttack":  { soils: ["Alluvial"], primaryCrops: ["Rice", "Vegetables", "Jute", "Coconut", "Banana"] },
+    "Sambalpur":{ soils: ["Red", "Lateritic"], primaryCrops: ["Rice", "Jowar", "Maize", "Cotton", "Pulses"] },
+    "Koraput":  { soils: ["Red", "Lateritic"], primaryCrops: ["Rice", "Maize", "Ragi", "Pulses", "Turmeric"] },
+  },
+  "Chhattisgarh": {
+    "Raipur":   { soils: ["Red", "Alluvial"], primaryCrops: ["Rice", "Wheat", "Maize", "Pulses", "Vegetables"] },
+    "Bilaspur": { soils: ["Red", "Lateritic"], primaryCrops: ["Rice", "Wheat", "Maize", "Soybean", "Pulses"] },
+    "Durg":     { soils: ["Black", "Red"], primaryCrops: ["Rice", "Wheat", "Cotton", "Soybean", "Vegetables"] },
+  },
+  "Assam": {
+    "Guwahati": { soils: ["Alluvial"], primaryCrops: ["Rice", "Jute", "Tea", "Mustard", "Vegetables"] },
+    "Jorhat":   { soils: ["Alluvial"], primaryCrops: ["Rice", "Tea", "Maize", "Vegetables", "Mustard"] },
+    "Dibrugarh":{ soils: ["Alluvial"], primaryCrops: ["Rice", "Tea", "Jute", "Mustard"] },
+  },
+  "Himachal Pradesh": {
+    "Shimla":   { soils: ["Sandy", "Loamy"], primaryCrops: ["Apple", "Potato", "Pea", "Wheat", "Maize"] },
+    "Kullu":    { soils: ["Loamy", "Sandy"], primaryCrops: ["Apple", "Pea", "Maize", "Wheat", "Vegetables"] },
+    "Kangra":   { soils: ["Alluvial", "Loamy"], primaryCrops: ["Rice", "Wheat", "Maize", "Tea", "Vegetables"] },
+  },
+  "Uttarakhand": {
+    "Dehradun": { soils: ["Alluvial", "Loamy"], primaryCrops: ["Rice", "Wheat", "Maize", "Vegetables", "Sugarcane"] },
+    "Haridwar": { soils: ["Alluvial"], primaryCrops: ["Sugarcane", "Wheat", "Rice", "Vegetables"] },
+    "Nainital": { soils: ["Loamy", "Sandy"], primaryCrops: ["Apple", "Pear", "Vegetables", "Wheat", "Maize"] },
+  },
+  "Kerala": {
+    "Thiruvananthapuram": { soils: ["Lateritic", "Coastal"], primaryCrops: ["Coconut", "Rice", "Banana", "Cassava", "Vegetables"] },
+    "Kochi":    { soils: ["Alluvial", "Coastal"], primaryCrops: ["Coconut", "Paddy", "Banana", "Vegetables", "Spices"] },
+    "Kozhikode":{ soils: ["Lateritic", "Alluvial"], primaryCrops: ["Coconut", "Rice", "Banana", "Pepper", "Ginger"] },
+    "Thrissur": { soils: ["Lateritic", "Alluvial"], primaryCrops: ["Coconut", "Rice", "Banana", "Vegetables", "Rubber"] },
+  },
+};
+// Merge extended states into otherStates
+Object.assign(otherStates, _ext);

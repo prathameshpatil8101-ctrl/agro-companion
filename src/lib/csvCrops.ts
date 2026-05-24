@@ -30,35 +30,25 @@ export interface CsvQuery {
 
 export function recommendFromCsv(q: CsvQuery): string[] {
   const rows = loadCropRows();
-  const matches = rows.filter(r =>
-    Math.abs(r.N - q.N) <= 25 &&
-    Math.abs(r.P - q.P) <= 25 &&
-    Math.abs(r.K - q.K) <= 25 &&
-    Math.abs(r.temperature - q.temperature) <= 5 &&
-    Math.abs(r.humidity - q.humidity) <= 12 &&
-    Math.abs(r.ph - q.ph) <= 1.2 &&
-    Math.abs(r.rainfall - q.rainfall) <= 60
-  );
-  const counts = new Map<string, number>();
-  for (const m of matches) counts.set(m.label, (counts.get(m.label) || 0) + 1);
-  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]);
-  if (sorted.length >= 3) return sorted.slice(0, 3).map(cap);
+  // Score every row by weighted distance — lower = better match
   const scored = rows.map(r => {
     const d =
-      Math.abs(r.N - q.N) / 50 + Math.abs(r.P - q.P) / 50 + Math.abs(r.K - q.K) / 50 +
+      Math.abs(r.N - q.N) / 50 +
+      Math.abs(r.P - q.P) / 50 +
+      Math.abs(r.K - q.K) / 50 +
       Math.abs(r.temperature - q.temperature) / 10 +
       Math.abs(r.humidity - q.humidity) / 30 +
-      Math.abs(r.ph - q.ph) / 3 + Math.abs(r.rainfall - q.rainfall) / 150;
+      Math.abs(r.ph - q.ph) / 3 +
+      Math.abs(r.rainfall - q.rainfall) / 150;
     return { label: r.label, d };
   }).sort((a, b) => a.d - b.d);
-  const seen = new Set(sorted);
-  for (const s of scored) {
-    if (!seen.has(s.label)) {
-      sorted.push(s.label); seen.add(s.label);
-      if (sorted.length === 3) break;
-    }
-  }
-  return sorted.slice(0, 3).map(cap);
+
+  // Count the best-matching crop by frequency among top 50 matches
+  const top50 = scored.slice(0, 50);
+  const counts = new Map<string, number>();
+  for (const s of top50) counts.set(s.label, (counts.get(s.label) || 0) + 1);
+  const winner = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || scored[0].label;
+  return [cap(winner)];
 }
 
 function cap(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WeatherRouteImport } from './routes/weather'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SchemesRouteImport } from './routes/schemes'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as OrganicFarmingRouteImport } from './routes/organic-farming'
 import { Route as MarketPricesRouteImport } from './routes/market-prices'
@@ -20,14 +21,8 @@ import { Route as DiseaseDiagnosisRouteImport } from './routes/disease-diagnosis
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CropRecommendationRouteImport } from './routes/crop-recommendation'
 import { Route as AiChatRouteImport } from './routes/ai-chat'
-import { Route as SchemesRouteImport } from './routes/schemes'
 import { Route as IndexRouteImport } from './routes/index'
 
-const SchemesRoute = SchemesRouteImport.update({
-  id: '/schemes',
-  path: '/schemes',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
   path: '/weather',
@@ -36,6 +31,11 @@ const WeatherRoute = WeatherRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchemesRoute = SchemesRouteImport.update({
+  id: '/schemes',
+  path: '/schemes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -194,19 +194,13 @@ export interface RootRouteChildren {
   MarketPricesRoute: typeof MarketPricesRoute
   OrganicFarmingRoute: typeof OrganicFarmingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SchemesRoute: typeof SchemesRoute
   SignupRoute: typeof SignupRoute
   WeatherRoute: typeof WeatherRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/schemes': {
-      id: '/schemes'
-      path: '/schemes'
-      fullPath: '/schemes'
-      preLoaderRoute: typeof SchemesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/weather': {
       id: '/weather'
       path: '/weather'
@@ -219,6 +213,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schemes': {
+      id: '/schemes'
+      path: '/schemes'
+      fullPath: '/schemes'
+      preLoaderRoute: typeof SchemesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {

@@ -465,3 +465,17 @@ export const diseaseDatabase: DiseaseInfo[] = [
     prevention: "Resistant varieties (Pusa Bold), early sowing, wider row spacing.",
     organicTreatment: "Bordeaux mixture 1% spray; remove and destroy infected inflorescences." },
 ];
+
+export function pickFallbackDisease() {
+  const d = diseaseDatabase[Math.floor(Math.random() * diseaseDatabase.length)];
+  return {
+    cropName: d.cropName,
+    diseaseName: d.diseaseName,
+    symptoms: d.symptoms,
+    cause: d.cause,
+    medicine: d.medicine,
+    treatment: d.treatment,
+    prevention: d.prevention,
+    organicTreatment: d.organicTreatment,
+  };
+}

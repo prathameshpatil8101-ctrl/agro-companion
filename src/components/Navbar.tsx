@@ -14,6 +14,7 @@ const LINKS = [
   { to: "/disease-diagnosis", key: "Disease Diagnosis" },
   { to: "/market-prices", key: "Market Prices" },
   { to: "/weather", key: "Weather" },
+  { to: "/schemes", key: "Govt Schemes" },
   { to: "/ai-chat", key: "AI Assistant" },
   { to: "/organic-farming", key: "Organic Farming" },
   { to: "/feedback", key: "Feedback" },

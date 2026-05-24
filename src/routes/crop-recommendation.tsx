@@ -2,52 +2,77 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
-import { Leaf, Sparkles, Loader2 } from "lucide-react";
+import { Leaf, Sparkles, Loader2, Trophy, CheckCircle } from "lucide-react";
 import { recommendCrops } from "@/lib/agro.functions";
 import { PageHeader } from "@/components/PageHeader";
+import { ALL_STATES, MAHARASHTRA_DISTRICTS, districtsForState } from "@/data/cropDatabase";
 
-export const Route = createFileRoute("/crop-recommendation")({
-  head: () => ({ meta: [
-    { title: "Crop Recommendation — AgroVision AI" },
-    { name: "description", content: "Get AI-recommended crops for your soil, season and region in India." },
-  ]}),
-  component: CropRec,
-});
-
-const STATES = ["Maharashtra", "Punjab", "Tamil Nadu", "Rajasthan", "Uttar Pradesh", "Karnataka", "Madhya Pradesh", "Gujarat"];
 const SOILS = ["Black", "Red", "Sandy", "Clay", "Loamy", "Alluvial"];
 const SEASONS = ["Kharif", "Rabi", "Zaid"];
 const WATER = ["Low", "Medium", "High"];
 
 function CropRec() {
   const [tab, setTab] = useState<"simple" | "advanced">("simple");
-  const [simple, setSimple] = useState({ state: "Maharashtra", district: "Pune", village: "", soilType: "Black", season: "Kharif", water: "Medium" });
+  const [simple, setSimple] = useState({
+    state: "Maharashtra", district: "Pune", village: "",
+    soilType: "Black", season: "Kharif", water: "Medium",
+  });
   const [adv, setAdv] = useState({ N: 90, P: 42, K: 43, ph: 6.5, temperature: 25, humidity: 60, rainfall: 100 });
   const fn = useServerFn(recommendCrops);
   const m = useMutation({ mutationFn: (input: any) => fn({ data: input }) });
 
+  const districts = districtsForState(simple.state);
+
+  const handleStateChange = (state: string) => {
+    const newDistricts = districtsForState(state);
+    setSimple({ ...simple, state, district: newDistricts[0] || "" });
+  };
+
+  const advancedResult = m.data?.crops?.[0]; // exactly 1 crop for advanced
+  const simpleResults = m.data?.crops?.slice(0, 3); // exactly 3 crops for simple
+
   return (
     <div>
-      <PageHeader icon={Leaf} title="Crop Recommendation" subtitle="Find the best crops to grow based on your soil, season and region — powered by AI and 2,200 soil-condition records." />
+      <PageHeader icon={Leaf} title="Crop Recommendation" subtitle="Find the best crops for your soil, season and region — powered by AI and 2,200 soil-condition records." />
       <div className="mx-auto max-w-5xl px-6 py-10">
         <div className="inline-flex rounded-xl bg-secondary p-1 mb-6">
-          <button onClick={() => setTab("simple")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "simple" ? "bg-background shadow text-primary" : "text-muted-foreground"}`}>Simple Farmer Method</button>
-          <button onClick={() => setTab("advanced")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "advanced" ? "bg-background shadow text-primary" : "text-muted-foreground"}`}>Advanced (NPK + Soil)</button>
+          <button onClick={() => setTab("simple")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "simple" ? "bg-background shadow text-primary" : "text-muted-foreground"}`}>
+            Simple Farmer Method
+          </button>
+          <button onClick={() => setTab("advanced")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "advanced" ? "bg-background shadow text-primary" : "text-muted-foreground"}`}>
+            Advanced (NPK + Soil Data)
+          </button>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6">
           {tab === "simple" ? (
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="State"><Select value={simple.state} options={STATES} onChange={v => setSimple({ ...simple, state: v })} /></Field>
-              <Field label="District"><Input value={simple.district} onChange={v => setSimple({ ...simple, district: v })} placeholder="e.g. Pune" /></Field>
-              <Field label="Village (optional)"><Input value={simple.village} onChange={v => setSimple({ ...simple, village: v })} /></Field>
-              <Field label="Soil Type"><Select value={simple.soilType} options={SOILS} onChange={v => setSimple({ ...simple, soilType: v })} /></Field>
-              <Field label="Season"><Select value={simple.season} options={SEASONS} onChange={v => setSimple({ ...simple, season: v })} /></Field>
-              <Field label="Water Availability"><Select value={simple.water} options={WATER} onChange={v => setSimple({ ...simple, water: v })} /></Field>
+              <Field label="State">
+                <Select value={simple.state} options={ALL_STATES} onChange={handleStateChange} />
+              </Field>
+              <Field label="District">
+                {districts.length > 0 ? (
+                  <Select value={simple.district} options={districts} onChange={v => setSimple({ ...simple, district: v })} />
+                ) : (
+                  <Input value={simple.district} onChange={v => setSimple({ ...simple, district: v })} placeholder="e.g. Pune" />
+                )}
+              </Field>
+              <Field label="Village (optional)">
+                <Input value={simple.village} onChange={v => setSimple({ ...simple, village: v })} placeholder="Optional" />
+              </Field>
+              <Field label="Soil Type">
+                <Select value={simple.soilType} options={SOILS} onChange={v => setSimple({ ...simple, soilType: v })} />
+              </Field>
+              <Field label="Season">
+                <Select value={simple.season} options={SEASONS} onChange={v => setSimple({ ...simple, season: v })} />
+              </Field>
+              <Field label="Water Availability">
+                <Select value={simple.water} options={WATER} onChange={v => setSimple({ ...simple, water: v })} />
+              </Field>
             </div>
           ) : (
             <>
-              <p className="text-sm text-muted-foreground mb-4">Enter your soil-test values. No location needed — pure agronomic inputs.</p>
+              <p className="text-sm text-muted-foreground mb-4">Enter your soil-test values. Our AI will find the single best crop match from 2,200 records.</p>
               <div className="grid sm:grid-cols-3 gap-4">
                 {([
                   { k: "N", label: "Nitrogen (N) — kg/ha" },
@@ -78,15 +103,43 @@ function CropRec() {
 
         {m.isError && <p className="mt-4 text-sm text-destructive">Could not load recommendations. Please try again.</p>}
 
-        {m.data && (
+        {/* Advanced: show 1 best crop prominently */}
+        {m.data && tab === "advanced" && advancedResult && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Top Recommended Crops</h2>
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+              <Trophy className="h-6 w-6 text-amber-500" /> Best Crop Match
+            </h2>
+            <div className="rounded-2xl border-2 border-primary bg-primary/5 p-8 flex flex-col sm:flex-row items-start gap-6">
+              <div className="flex-shrink-0 rounded-full bg-primary/15 p-5">
+                <Leaf className="h-10 w-10 text-primary" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-widest text-primary">Perfect match based on your soil data</div>
+                <h3 className="text-4xl font-bold mt-1 text-foreground">{advancedResult.name}</h3>
+                <p className="text-muted-foreground mt-3 leading-relaxed max-w-xl">{advancedResult.reason}</p>
+                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-4 py-1.5 text-sm font-semibold">
+                  <CheckCircle className="h-4 w-4" /> Recommended for your conditions
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Simple: show 3 crops */}
+        {m.data && tab === "simple" && simpleResults && simpleResults.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-1">Top 3 Recommended Crops</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Best crops for {simple.district}, {simple.state} · {simple.season} season · {simple.soilType} soil · {simple.water} water
+            </p>
             <div className="grid sm:grid-cols-3 gap-4">
-              {m.data.crops.map((c: any, i: number) => (
-                <div key={c.name} className="rounded-2xl border border-border bg-card p-5 hover:shadow-lg transition">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">#{i + 1} match</div>
+              {simpleResults.map((c: any, i: number) => (
+                <div key={c.name} className={`rounded-2xl border bg-card p-5 hover:shadow-lg transition ${i === 0 ? "border-primary border-2" : "border-border"}`}>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    {i === 0 ? <span className="text-primary font-semibold">⭐ Best choice</span> : `#${i + 1} match`}
+                  </div>
                   <h3 className="text-xl font-bold mt-1 text-primary">{c.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-2">{c.reason}</p>
+                  <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{c.reason}</p>
                 </div>
               ))}
             </div>
@@ -108,3 +161,11 @@ function Select({ value, options, onChange }: { value: string; options: readonly
     {options.map(o => <option key={o} value={o}>{o}</option>)}
   </select>;
 }
+
+export const Route = createFileRoute("/crop-recommendation")({
+  head: () => ({ meta: [
+    { title: "Crop Recommendation — AgroVision AI" },
+    { name: "description", content: "Get AI-recommended crops for your soil, season and region in India." },
+  ]}),
+  component: CropRec,
+});
